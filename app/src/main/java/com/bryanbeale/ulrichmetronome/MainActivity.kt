@@ -1,25 +1,56 @@
 package com.bryanbeale.ulrichmetronome
 
+import android.media.MediaPlayer
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.View.OnClickListener
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.SeekBar
 
 import kotlinx.android.synthetic.main.content_main.*
+import java.util.*
 
-class MainActivity : AppCompatActivity(), OnClickListener {
+class MainActivity : AppCompatActivity(), OnClickListener, SeekBar.OnSeekBarChangeListener, AdapterView.OnItemSelectedListener {
+    override fun onNothingSelected(p0: AdapterView<*>?) {
+        bpb = BPB[0]
+    }
+
+    override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+        bpb = BPB[p2]
+    }
+
+    override fun onStartTrackingTouch(p0: SeekBar?) {
+    }
+
+    override fun onStopTrackingTouch(p0: SeekBar?) {
+    }
+
+    override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+        var value  = MIN + (p0?.progress!! * STEP)
+
+        textView.text = "$value BPM"
+    }
 
     var playing = false
+
+    var MIN = 30
+    var MAX = 250
+    var STEP = 1
+    var ThreadBoi = Thread()
+    var BPB = arrayOf("2", "4", "6", "8", "16")
+    var bpb = BPB[0]
 
     override fun onClick(p0: View?) {
 
         if (p0?.id == fab.id){
-            if (playing) {
-                playing = true
+            if (!playing) {
                 fab.setImageResource(android.R.drawable.ic_media_pause)
+                playing = true
             }
             else{
                 fab.setImageResource(android.R.drawable.ic_media_play)
@@ -33,12 +64,25 @@ class MainActivity : AppCompatActivity(), OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.content_main)
 
+        spinner!!.onItemSelectedListener = this
+
+        val aa = ArrayAdapter(this, android.R.layout.simple_spinner_item, BPB)
+        aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        ThreadBoi = Thread(Runnable { metronome() })
+        ThreadBoi.start()
+
         setSupportActionBar(toolbar)
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", this).show()
-        }
+        fab.setOnClickListener(this)
+
+        seekBar!!.max = (MAX - MIN)/STEP
+
+        seekBar!!.setOnSeekBarChangeListener(this)
+
+        spinner!!.adapter = aa
+        spinner.setSelection(0)
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -57,16 +101,44 @@ class MainActivity : AppCompatActivity(), OnClickListener {
         }
     }
 
-    fun metronome(bpm: Int, bpb: Int, maxBeats: Int = Int.MAX_VALUE) {
-        val delay = 60_000L / bpm
+    /**
+     * bpm = beats per minute
+     * bpb = beats per bar
+     * maxBeats = the amount of beats to go through
+     */
+    private fun metronome(maxBeats: Int = Int.MAX_VALUE) {
+        var mp = MediaPlayer.create(this, R.raw.tick_boi2)
+        var mp2 = MediaPlayer.create(this, R.raw.tick_boi)
         var beats = 0
+
         do {
+            if (!playing){
+                continue
+            }
+
+            var bpm = MIN + (seekBar?.progress!! * STEP)
+            var bpb = this.bpb.toInt()
+            var r = Random()
+            var delay = 60_000L / bpm
+
+            if (r.nextInt(2000) % 2 == 1){
+                delay += r.nextInt(200)
+            }
+
+            if (beats % bpb == 0) {
+                mp.setVolume(1f, 1f)
+                mp.start()
+                Log.d("Metronome", "TICK ")
+            }
+            else{
+                mp2.setVolume(1f, 1f)
+                mp2.start()
+                Log.d("Metronome" ,"tick ")
+            }
             Thread.sleep(delay)
-            if (beats % bpb == 0) print("\nTICK ")
-            else print("tick ")
             beats++
         }
         while (beats < maxBeats)
-        println()
     }
 }
+
