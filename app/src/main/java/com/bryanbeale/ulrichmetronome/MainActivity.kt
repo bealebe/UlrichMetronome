@@ -11,6 +11,7 @@ import android.view.View.OnClickListener
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.SeekBar
+import com.google.android.gms.ads.MobileAds
 
 import kotlinx.android.synthetic.main.content_main.*
 import java.util.*
@@ -83,6 +84,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, SeekBar.OnSeekBarChan
         spinner!!.adapter = aa
         spinner.setSelection(0)
 
+        MobileAds.initialize(this, "ca-app-pub-7844185607942332~4216511020")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
