@@ -11,12 +11,18 @@ import android.view.View.OnClickListener
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.SeekBar
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 
 import kotlinx.android.synthetic.main.content_main.*
 import java.util.*
 
 class MainActivity : AppCompatActivity(), OnClickListener, SeekBar.OnSeekBarChangeListener, AdapterView.OnItemSelectedListener {
+
+    lateinit var mAdView : AdView
+
     override fun onNothingSelected(p0: AdapterView<*>?) {
         bpb = BPB[0]
     }
@@ -85,6 +91,35 @@ class MainActivity : AppCompatActivity(), OnClickListener, SeekBar.OnSeekBarChan
         spinner.setSelection(0)
 
         MobileAds.initialize(this, "ca-app-pub-7844185607942332~4216511020")
+
+        mAdView = findViewById(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
+
+        mAdView.adListener = object: AdListener() {
+            override fun onAdLoaded() {
+                // Code to be executed when an ad finishes loading.
+            }
+
+            override fun onAdFailedToLoad(errorCode : Int) {
+               Log.wtf("AdMob", "Ad failed " + errorCode)
+
+            }
+
+            override fun onAdOpened() {
+                // Code to be executed when an ad opens an overlay that
+                // covers the screen.
+            }
+
+            override fun onAdLeftApplication() {
+                // Code to be executed when the user has left the app.
+            }
+
+            override fun onAdClosed() {
+                // Code to be executed when when the user is about to return
+                // to the app after tapping on an ad.
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
