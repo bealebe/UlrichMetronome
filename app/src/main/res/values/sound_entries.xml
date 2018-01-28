@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="entries_sound_list">
+        <item>Normal Metronome</item>
+        <item>Normal Metronome 2</item>
+        <item>Trash Snare</item>
+        <item>Closed High Hat</item>
+        <item>St. Anger</item>
+        <item>Trash Can</item>
+    </string-array>
+    <array name="entries_sound_list_values">
+        <item>@raw/tick_boi2</item>
+        <item>@raw/tick_boi3</item>
+        <item>@raw/low_trash</item>
+        <item>@raw/closed_hat</item>
+        <item>@raw/high_st_anger</item>
+        <item>@raw/actual_trash_can</item>
+    </array>
+
+</resources>

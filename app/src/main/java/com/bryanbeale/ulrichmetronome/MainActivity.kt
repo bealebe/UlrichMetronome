@@ -1,5 +1,7 @@
 package com.bryanbeale.ulrichmetronome
 
+import android.content.Intent
+import android.content.res.TypedArray
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -23,34 +25,36 @@ class MainActivity : AppCompatActivity(), OnClickListener, SeekBar.OnSeekBarChan
 
     lateinit var mAdView : AdView
 
-    override fun onNothingSelected(p0: AdapterView<*>?) {
-        bpb = BPB[0]
-    }
-
-    override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-        bpb = BPB[p2]
-    }
-
-    override fun onStartTrackingTouch(p0: SeekBar?) {
-    }
-
-    override fun onStopTrackingTouch(p0: SeekBar?) {
-    }
-
-    override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-        var value  = MIN + (p0?.progress!! * STEP)
-
-        textView.text = "$value BPM"
-    }
+    var mp = MediaPlayer()
+    var mp2 = MediaPlayer()
 
     var playing = false
 
     var MIN = 30
     var MAX = 250
     var STEP = 1
+    var RES_RAW = "res/raw/"
+    var MP3 = ".mp3"
+    var WAV = ".wav"
+    var AIFF = ".aiff"
     var ThreadBoi = Thread()
     var BPB = arrayOf("2", "4", "6", "8", "16")
     var bpb = BPB[0]
+
+    override fun onResume() {
+        super.onResume()
+
+    }
+
+    override fun onPause() {
+
+        super.onPause()
+
+        playing = false
+
+        fab.setImageResource(android.R.drawable.ic_media_play)
+
+    }
 
     override fun onClick(p0: View?) {
 
@@ -76,9 +80,6 @@ class MainActivity : AppCompatActivity(), OnClickListener, SeekBar.OnSeekBarChan
         val aa = ArrayAdapter(this, android.R.layout.simple_spinner_item, BPB)
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        ThreadBoi = Thread(Runnable { metronome() })
-        ThreadBoi.start()
-
         setSupportActionBar(toolbar)
 
         fab.setOnClickListener(this)
@@ -89,6 +90,11 @@ class MainActivity : AppCompatActivity(), OnClickListener, SeekBar.OnSeekBarChan
 
         spinner!!.adapter = aa
         spinner.setSelection(0)
+
+        onActivityResult(0,0,null)
+
+        ThreadBoi = Thread(Runnable { metronome() })
+        ThreadBoi.start()
 
         MobileAds.initialize(this, "ca-app-pub-7844185607942332~4216511020")
 
@@ -133,9 +139,44 @@ class MainActivity : AppCompatActivity(), OnClickListener, SeekBar.OnSeekBarChan
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.action_settings -> true
+            R.id.action_settings -> openPreferenceFragment()
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val prefs = this.getSharedPreferences("com.bryanbeale.ulrichmetronome_preferences", MODE_PRIVATE)
+        mp.reset()
+        mp2.reset()
+
+        mp = MediaPlayer.create(this,  resources.getIdentifier(prefs.getString("list_preference_1", "").replace(RES_RAW, "").replace(WAV, "").replace(AIFF, "").replace(MP3, ""), "raw", packageName))
+        mp2 = MediaPlayer.create(this, resources.getIdentifier(prefs.getString("list_preference_2", "").replace(RES_RAW, "").replace(WAV, "").replace(AIFF, "").replace(MP3, ""), "raw", packageName))
+    }
+
+    private fun openPreferenceFragment(): Boolean {
+
+        startActivityForResult(Intent(this, SettingsActivity::class.java), 0)
+        return true
+    }
+
+    override fun onNothingSelected(p0: AdapterView<*>?) {
+        bpb = BPB[0]
+    }
+
+    override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+        bpb = BPB[p2]
+    }
+
+    override fun onStartTrackingTouch(p0: SeekBar?) {
+    }
+
+    override fun onStopTrackingTouch(p0: SeekBar?) {
+    }
+
+    override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+        var value  = MIN + (p0?.progress!! * STEP)
+
+        textView.text = "$value BPM"
     }
 
     /**
@@ -144,11 +185,11 @@ class MainActivity : AppCompatActivity(), OnClickListener, SeekBar.OnSeekBarChan
      * maxBeats = the amount of beats to go through
      */
     private fun metronome(maxBeats: Int = Int.MAX_VALUE) {
-        var mp = MediaPlayer.create(this, R.raw.tick_boi2)
-        var mp2 = MediaPlayer.create(this, R.raw.tick_boi)
+
         var beats = 0
 
         do {
+
             if (!playing){
                 continue
             }
@@ -164,13 +205,15 @@ class MainActivity : AppCompatActivity(), OnClickListener, SeekBar.OnSeekBarChan
 
             if (beats % bpb == 0) {
                 mp.setVolume(1f, 1f)
+                mp.seekTo(0)
                 mp.start()
-                Log.d("Metronome", "TICK ")
+                Log.wtf("Metronome", "TICK ")
             }
             else{
                 mp2.setVolume(1f, 1f)
+                mp2.seekTo(0)
                 mp2.start()
-                Log.d("Metronome" ,"tick ")
+                Log.wtf("Metronome" ,"tick ")
             }
             Thread.sleep(delay)
             beats++

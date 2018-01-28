@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="Tap Below to Choose Click Track 1">
+
+        <ListPreference
+            android:key="list_preference_1"
+            android:title="Select a track"
+            android:dialogTitle="Select a track"
+            android:entries="@array/entries_sound_list"
+            android:entryValues="@array/entries_sound_list_values"
+            android:defaultValue="@raw/tick_boi2"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Tap Below to Choose Click Track 2">
+
+        <ListPreference
+            android:key="list_preference_2"
+            android:title="Select a Track"
+            android:dialogTitle="Select a Track"
+            android:entries="@array/entries_sound_list"
+            android:entryValues="@array/entries_sound_list_values"
+            android:defaultValue="@raw/tick_boi3"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
