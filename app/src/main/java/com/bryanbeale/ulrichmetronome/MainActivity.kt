@@ -5,6 +5,7 @@ import android.content.res.TypedArray
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.preference.PreferenceManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -73,6 +74,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, SeekBar.OnSeekBarChan
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
         setContentView(R.layout.content_main)
 
         spinner!!.onItemSelectedListener = this
@@ -91,7 +93,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, SeekBar.OnSeekBarChan
         spinner!!.adapter = aa
         spinner.setSelection(0)
 
-        onActivityResult(0,0,null)
+        setupSounds()
 
         ThreadBoi = Thread(Runnable { metronome() })
         ThreadBoi.start()
@@ -145,17 +147,24 @@ class MainActivity : AppCompatActivity(), OnClickListener, SeekBar.OnSeekBarChan
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if(requestCode == 1) {
+
+            setupSounds()
+        }
+    }
+
+    private fun setupSounds() {
         val prefs = this.getSharedPreferences("com.bryanbeale.ulrichmetronome_preferences", MODE_PRIVATE)
         mp.reset()
         mp2.reset()
 
-        mp = MediaPlayer.create(this,  resources.getIdentifier(prefs.getString("list_preference_1", "").replace(RES_RAW, "").replace(WAV, "").replace(AIFF, "").replace(MP3, ""), "raw", packageName))
+        mp = MediaPlayer.create(this, resources.getIdentifier(prefs.getString("list_preference_1", "").replace(RES_RAW, "").replace(WAV, "").replace(AIFF, "").replace(MP3, ""), "raw", packageName))
         mp2 = MediaPlayer.create(this, resources.getIdentifier(prefs.getString("list_preference_2", "").replace(RES_RAW, "").replace(WAV, "").replace(AIFF, "").replace(MP3, ""), "raw", packageName))
     }
 
     private fun openPreferenceFragment(): Boolean {
 
-        startActivityForResult(Intent(this, SettingsActivity::class.java), 0)
+        startActivityForResult(Intent(this, SettingsActivity::class.java), 1)
         return true
     }
 
